@@ -1,0 +1,57 @@
+/* src/pages/Ranking.css */
+
+.ranking-container {
+  width: 90%;
+  max-width: 1200px;
+  margin: 50px auto;
+}
+
+.ranking-container h2 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.ranking-tables {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+
+.ranking-table-container {
+  flex: 1 1 45%; /* 화면 크기에 따라 반응형으로 너비 조절 */
+  min-width: 300px;
+}
+
+.ranking-table-container h3 {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.ranking-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ranking-table th,
+.ranking-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+.ranking-table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .ranking-tables {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .ranking-table-container {
+    flex: 1 1 100%;
+  }
+}

@@ -1,0 +1,96 @@
+/* src/pages/Quiz.css */
+
+/* 퀴즈 컨테이너 스타일 */
+.quiz-container {
+  width: 80%;
+  max-width: 600px;
+  margin: 50px auto;
+  text-align: center;
+  background-color: #ffffff;
+  padding: 20px;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+}
+
+.quiz-container h2 {
+  margin-bottom: 20px;
+}
+
+.quiz-image {
+  width: 200px;
+  height: 200px;
+  margin-bottom: 20px;
+}
+
+.quiz-input {
+  padding: 10px;
+  font-size: 18px;
+  width: 100px;
+  margin-bottom: 20px;
+}
+
+.quiz-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.quiz-button:hover {
+  background-color: #2980b9;
+}
+
+.quiz-question {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+/* 웹캠 컨테이너 스타일 (QuizType2에서 사용) */
+.webcam-container {
+  position: relative;
+  width: 640px;
+  height: 480px;
+  margin: 0 auto;
+}
+
+.output_canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* 추가 스타일 */
+p {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+/* 정답 및 오답 표시 스타일 추가 */
+.answer-feedback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.answer-feedback .icon {
+  font-size: 60px;
+  margin-bottom: 10px;
+}
+
+.answer-feedback.correct .icon {
+  color: #2ecc71; /* 초록색 */
+}
+
+.answer-feedback.incorrect .icon {
+  color: #e74c3c; /* 빨간색 */
+}
+
+.answer-feedback p {
+  font-size: 24px;
+  font-weight: bold;
+}
