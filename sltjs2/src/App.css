@@ -1,0 +1,286 @@
+/* App.css */
+
+/* 상단 헤더 스타일 */
+.App-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background-color: #2c3e50;
+  color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 타이틀 스타일 */
+.project-title {
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.project-title:hover {
+  color: #2980b9;
+}
+
+/* 로그인 및 회원가입 버튼 스타일 */
+.auth-buttons button {
+  margin-left: 15px;
+  padding: 10px 20px;
+  border: none;
+  background-color: #3498db;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.auth-buttons button:hover {
+  background-color: #2980b9;
+}
+
+/* 메인 콘텐츠 스타일 */
+.main-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: calc(100vh - 80px);
+  background-color: #ecf0f1;
+}
+
+/* 웹캠과 번역 결과를 나란히 배치 */
+.content-container {
+  display: flex;
+  justify-content: center;
+  align-items: center; /* 요소들을 수직 중앙 정렬 */
+  width: 85%;
+  max-width: 1200px;
+  margin-top: 50px; /* 화면을 아래로 내리기 위한 마진 */
+  position: relative; /* 화살표 위치를 위해 relative 설정 */
+}
+
+/* 웹캠 박스 스타일 */
+.webcam-box {
+  width: 520px;
+  height: 520px;
+  border: 3px solid #3498db;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+/* 번역 결과 박스 스타일 */
+.translation-box {
+  width: 480px;
+  height: 480px;
+  padding: 20px;
+  border: 2px solid #ddd;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* 내용 위쪽에 배치 */
+}
+
+/* 번역 결과 텍스트 스타일 */
+.result-text {
+  font-size: 24px;
+  color: #2c3e50;
+  text-align: left;
+  white-space: pre-wrap;
+  margin-bottom: 20px; /* 텍스트와 화살표 간 간격 */
+}
+
+/* 화살표 및 레이블 스타일 */
+.arrow-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 20px; /* 웹캠과 번역 박스 사이 간격 */
+  position: relative; /* 화살표의 절대 위치를 위해 */
+}
+
+.arrow {
+  width: 0;
+  height: 0;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 20px solid #2c3e50; /* 화살표 색상 (오른쪽을 향하도록) */
+  margin: 10px 0; /* 화살표와 레이블 간 간격 */
+}
+
+.arrow-label {
+  font-size: 18px;
+  color: #2c3e50;
+  position: absolute;
+  top: 50%; /* 화살표의 중간 위치 */
+  transform: translateY(-50%);
+  left: 100%; /* 화살표 오른쪽에 위치 */
+  margin-left: 10px; /* 화살표와 레이블 간 간격 */
+}
+
+/* 캔버스 스타일 */
+.output_canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* 상태 컨테이너 스타일 */
+.status-container {
+  margin-top: 20px;
+  font-size: 18px;
+  color: #2c3e50;
+  text-align: center;
+}
+
+.status-container p {
+  margin: 5px 0;
+}
+
+/* 로그인 및 회원가입 컨테이너 스타일 */
+.auth-container {
+  width: 300px;
+  margin: 100px auto;
+  padding: 20px;
+  background-color: #ffffff;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.auth-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.auth-container form {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 입력 필드 스타일 */
+.auth-container input {
+  margin-bottom: 15px;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+/* 로그인 및 회원가입 버튼 스타일 */
+.auth-container button {
+  padding: 10px;
+  font-size: 16px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.auth-container button:hover {
+  background-color: #2980b9;
+}
+
+/* 소셜 로그인 버튼들 컨테이너 */
+.social-login-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* 소셜 로그인 버튼 스타일 */
+.social-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  font-size: 16px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.social-button .icon {
+  margin-right: 10px;
+  font-size: 20px;
+}
+
+.social-button:hover {
+  background-color: #2980b9;
+}
+
+/* 비밀번호 재설정 링크 스타일 */
+.forgot-password {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.forgot-password-text {
+  color: #3498db;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.forgot-password-text:hover {
+  color: #2980b9;
+}
+
+/* 버튼 고정 그룹 스타일 */
+.fixed-button-group {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  gap: 10px; /* 버튼 간 간격 */
+  z-index: 1000; /* 다른 요소들보다 위에 표시되도록 설정 */
+}
+
+/* 복사 버튼 스타일 */
+.copy-button {
+  padding: 10px 20px;
+  border: none;
+  background-color: #3498db;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.copy-button:hover {
+  background-color: #2980b9;
+}
+
+/* 카카오톡 공유 버튼 스타일 */
+.kakao-share-button {
+  padding: 10px 20px;
+  border: none;
+  background-color: #fee500; /* 카카오톡 노란색 */
+  color: #3c1e1e; /* 카카오톡 텍스트 색상 */
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.3s;
+}
+
+.kakao-share-button .icon {
+  margin-right: 8px;
+  font-size: 20px;
+}
+
+.kakao-share-button:hover {
+  background-color: #ffd600; /* 호버 시 더 진한 노란색 */
+}
