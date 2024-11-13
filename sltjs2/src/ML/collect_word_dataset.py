@@ -6,7 +6,8 @@ import mediapipe as mp
 from PIL import ImageFont, ImageDraw, Image  # PIL 라이브러리 임포트
 
 # 액션(단어) 리스트
-actions = np.array(['괜찮다', '미안', '사랑', '좋다', '가다', '못하다', '예쁘다', '알다', '보다', '서울', '감사', '나', '너'])
+# actions = np.array(['괜찮다', '미안', '사랑', '좋다', '가다', '못하다', '예쁘다', '알다', '보다', '서울', '감사', '나', '너'])
+actions = np.array(['괜찮다','감사'])
 # 데이터 저장 경로
 DATA_PATH = os.path.join('MP_Data')
 
