@@ -422,3 +422,33 @@
 .nav-button:hover {
   background-color: #2980b9;
 }
+
+/* 모드 선택 페이지 스타일 추가 */
+
+.mode-selection-container {
+  width: 80%;
+  max-width: 600px;
+  margin: 50px auto;
+  text-align: center;
+}
+
+.mode-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 30px;
+}
+
+.mode-select-button {
+  padding: 20px 40px;
+  font-size: 18px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.mode-select-button:hover {
+  background-color: #2980b9;
+}

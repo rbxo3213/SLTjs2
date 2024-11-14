@@ -7,7 +7,9 @@ import { signOut } from "firebase/auth";
 import Login from "./Login";
 import Signup from "./Signup";
 import ResetPassword from "./ResetPassword";
+import ModeSelection from "./ModeSelection"; // 새로운 모드 선택 컴포넌트
 import MainContent from "./MainContent";
+import WordTranslation from "./WordTranslation"; // 새로운 단어 번역 컴포넌트
 import QuizType1 from "./pages/QuizType1";
 import QuizType2 from "./pages/QuizType2";
 import Ranking from "./pages/Ranking";
@@ -38,7 +40,6 @@ function App() {
           Sign Language Translator
         </div>
         <nav className="nav-links">
-          {/* 네비게이션 링크를 버튼으로 변경하고, 'auth-buttons' 클래스 적용 */}
           <div className="nav-buttons">
             <button
               onClick={() => navigate("/sign-language-quiz")}
@@ -67,7 +68,7 @@ function App() {
       </header>
 
       <Routes>
-        <Route path="/" element={<MainContent />} />
+        <Route path="/" element={<ModeSelection />} />
         <Route
           path="/login"
           element={<Login onSuccess={() => navigate("/")} />}
@@ -82,6 +83,10 @@ function App() {
         <Route path="/quiz-type2" element={<QuizType2 />} />
         <Route path="/ranking" element={<Ranking />} />
         <Route path="/quiz-result" element={<QuizResult />} />
+        <Route path="/finger-spelling" element={<MainContent />} />{" "}
+        {/* 지문자 모드 */}
+        <Route path="/word-translation" element={<WordTranslation />} />{" "}
+        {/* 단어번역 모드 */}
       </Routes>
     </div>
   );
