@@ -15,6 +15,7 @@ import Ranking from "./pages/Ranking";
 import QuizResult from "./pages/QuizResult";
 import SignLanguageQuiz from "./pages/SignLanguageQuiz";
 import "./App.css";
+import KakaoRedirect from "./KakaoRedirect";
 
 function App() {
   const [user, setUser] = React.useState(null);
@@ -86,6 +87,7 @@ function App() {
         <Route path="/quiz-type2" element={<QuizType2 />} />
         <Route path="/ranking" element={<Ranking />} />
         <Route path="/quiz-result" element={<QuizResult />} />
+        <Route path="/kakaoRedirect" element={<KakaoRedirect />} />
       </Routes>
     </div>
   );

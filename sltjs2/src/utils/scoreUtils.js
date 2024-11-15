@@ -1,24 +1,24 @@
 // src/utils/scoreUtils.js
 
-import { db } from "../firebaseConfig";
-import { collection, addDoc, Timestamp } from "firebase/firestore";
-import { auth } from "../firebaseConfig";
+import { auth, db } from "../firebaseConfig";
+import { collection, addDoc } from "firebase/firestore";
 
-export const saveScore = async (score, type) => {
-  try {
-    const user = auth.currentUser;
-    if (user) {
-      const docRef = await addDoc(collection(db, "scores"), {
-        email: user.email,
+export async function saveScore(score, quizType) {
+  const user = auth.currentUser;
+  if (user) {
+    try {
+      await addDoc(collection(db, "scores"), {
+        uid: user.uid,
+        email: user.email || null,
         score: score,
-        type: type, // 퀴즈 유형 저장
-        createdAt: Timestamp.now(),
+        type: quizType,
+        createdAt: new Date(),
       });
-      console.log("Score saved with ID:", docRef.id);
-    } else {
-      console.log("No user is currently signed in.");
+      console.log("Score saved successfully");
+    } catch (error) {
+      console.error("Error saving score:", error);
     }
-  } catch (error) {
-    console.error("Error saving score:", error);
+  } else {
+    console.error("User is not authenticated");
   }
-};
+}

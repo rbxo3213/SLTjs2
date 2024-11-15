@@ -24,23 +24,35 @@ function Ranking() {
         const querySnapshot2 = await getDocs(q2);
         const scores2 = querySnapshot2.docs.map((doc) => doc.data());
 
+        // 사용자 정보 가져오기
+        const usersRef = collection(db, "users");
+        const usersSnapshot = await getDocs(usersRef);
+        const usersData = usersSnapshot.docs.map((doc) => doc.data());
+
+        // uid를 키로 닉네임을 값으로 하는 맵 생성
+        const uidToNickname = {};
+        usersData.forEach((user) => {
+          uidToNickname[user.uid] = user.nickname || "익명 사용자";
+        });
+
         // 각 퀴즈 유형별로 계정별 평균 점수와 판수 계산
         const calculateRanks = (scores) => {
           const userScores = {};
 
           scores.forEach((score) => {
-            const email = score.email;
-            if (!userScores[email]) {
-              userScores[email] = { totalScore: 0, attempts: 0 };
+            const uid = score.uid || "guest"; // uid 사용
+            if (!userScores[uid]) {
+              userScores[uid] = { totalScore: 0, attempts: 0 };
             }
-            userScores[email].totalScore += score.score;
-            userScores[email].attempts += 1;
+            userScores[uid].totalScore += score.score;
+            userScores[uid].attempts += 1;
           });
 
-          const ranks = Object.keys(userScores).map((email) => {
-            const { totalScore, attempts } = userScores[email];
+          const ranks = Object.keys(userScores).map((uid) => {
+            const { totalScore, attempts } = userScores[uid];
             const averageScore = totalScore / attempts;
-            return { email, averageScore, attempts };
+            const nickname = uidToNickname[uid] || "익명 사용자";
+            return { nickname, averageScore, attempts };
           });
 
           // 정렬: 평균 점수 내림차순, 평균 점수가 같으면 판수 오름차순
@@ -78,7 +90,7 @@ function Ranking() {
             <thead>
               <tr>
                 <th>순위</th>
-                <th>이메일</th>
+                <th>닉네임</th>
                 <th>평균 점수</th>
                 <th>판수</th>
               </tr>
@@ -87,7 +99,7 @@ function Ranking() {
               {quizType1Ranks.map((rank, index) => (
                 <tr key={index}>
                   <td>{index + 1}</td>
-                  <td>{rank.email}</td>
+                  <td>{rank.nickname}</td>
                   <td>{rank.averageScore.toFixed(2)}</td>
                   <td>{rank.attempts}</td>
                 </tr>
@@ -101,7 +113,7 @@ function Ranking() {
             <thead>
               <tr>
                 <th>순위</th>
-                <th>이메일</th>
+                <th>닉네임</th>
                 <th>평균 점수</th>
                 <th>판수</th>
               </tr>
@@ -110,7 +122,7 @@ function Ranking() {
               {quizType2Ranks.map((rank, index) => (
                 <tr key={index}>
                   <td>{index + 1}</td>
-                  <td>{rank.email}</td>
+                  <td>{rank.nickname}</td>
                   <td>{rank.averageScore.toFixed(2)}</td>
                   <td>{rank.attempts}</td>
                 </tr>

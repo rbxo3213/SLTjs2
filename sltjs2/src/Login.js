@@ -1,19 +1,18 @@
 // src/Login.js
 
 import React, { useState, useEffect } from "react";
-import { auth } from "./firebaseConfig";
+import { auth, db } from "./firebaseConfig"; // Firestore 객체 임포트
 import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
   GithubAuthProvider,
   signInWithPopup,
+  updateProfile,
 } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore"; // Firestore 함수 임포트
 import { useNavigate } from "react-router-dom";
 import { FaGoogle, FaGithub } from "react-icons/fa";
 import { SiKakaotalk } from "react-icons/si";
-
-// 카카오 JavaScript SDK 사용
-// window.Kakao 객체를 사용하기 위해 SDK가 로드되었는지 확인
 
 const googleProvider = new GoogleAuthProvider();
 const githubProvider = new GithubAuthProvider();
@@ -26,7 +25,7 @@ function Login({ onSuccess }) {
   useEffect(() => {
     // 카카오 SDK 초기화
     if (window.Kakao && !window.Kakao.isInitialized()) {
-      window.Kakao.init("YOUR_KAKAO_JAVASCRIPT_KEY"); // 실제 앱 키로 교체하세요
+      window.Kakao.init("1e157e9fb7ac775d68ced205ece37f1f"); // 실제 JavaScript 키로 교체하세요
       console.log("Kakao SDK initialized");
     }
   }, []);
@@ -34,7 +33,26 @@ function Login({ onSuccess }) {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+
+      // Firestore에 사용자 정보 저장
+      await setDoc(
+        doc(db, "users", user.uid),
+        {
+          uid: user.uid,
+          email: user.email,
+          nickname: user.displayName || user.email.split("@")[0],
+          provider: "email",
+          lastLogin: new Date(),
+        },
+        { merge: true }
+      );
+
       onSuccess();
     } catch (error) {
       console.error("로그인 에러:", error);
@@ -44,7 +62,28 @@ function Login({ onSuccess }) {
 
   const handleGoogleLogin = async () => {
     try {
-      await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      // 이메일에서 사용자명 추출하여 닉네임 설정
+      const nickname = user.email.split("@")[0];
+      await updateProfile(user, {
+        displayName: nickname,
+      });
+
+      // Firestore에 사용자 정보 저장
+      await setDoc(
+        doc(db, "users", user.uid),
+        {
+          uid: user.uid,
+          email: user.email,
+          nickname: nickname,
+          provider: "google",
+          lastLogin: new Date(),
+        },
+        { merge: true }
+      );
+
       onSuccess();
     } catch (error) {
       console.error("Google 로그인 에러:", error);
@@ -54,7 +93,28 @@ function Login({ onSuccess }) {
 
   const handleGithubLogin = async () => {
     try {
-      await signInWithPopup(auth, githubProvider);
+      const result = await signInWithPopup(auth, githubProvider);
+      const user = result.user;
+
+      // 이메일에서 사용자명 추출하여 닉네임 설정
+      const nickname = user.email.split("@")[0];
+      await updateProfile(user, {
+        displayName: nickname,
+      });
+
+      // Firestore에 사용자 정보 저장
+      await setDoc(
+        doc(db, "users", user.uid),
+        {
+          uid: user.uid,
+          email: user.email,
+          nickname: nickname,
+          provider: "github",
+          lastLogin: new Date(),
+        },
+        { merge: true }
+      );
+
       onSuccess();
     } catch (error) {
       console.error("GitHub 로그인 에러:", error);
@@ -68,28 +128,9 @@ function Login({ onSuccess }) {
       return;
     }
 
-    window.Kakao.Auth.login({
-      scope: "profile_nickname, account_email, talk_message",
-      success: function (authObj) {
-        console.log("카카오 로그인 성공", authObj);
-
-        window.Kakao.API.request({
-          url: "/v2/user/me",
-          success: function (res) {
-            console.log("카카오 사용자 정보", res);
-            // Firebase Authentication과 연동하려면 추가 작업 필요
-            onSuccess();
-          },
-          fail: function (error) {
-            console.log("카카오 사용자 정보 요청 실패", error);
-            alert("카카오 사용자 정보 요청 실패");
-          },
-        });
-      },
-      fail: function (err) {
-        console.error("카카오 로그인 실패", err);
-        alert("카카오 로그인 실패");
-      },
+    window.Kakao.Auth.authorize({
+      redirectUri: "http://localhost:3000/kakaoRedirect",
+      scope: "profile_nickname",
     });
   };
 
