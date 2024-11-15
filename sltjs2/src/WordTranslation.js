@@ -1,6 +1,6 @@
-// WordTranslation.js
+// src/WordTranslation.js
 
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Webcam from "react-webcam";
 import {
   Holistic,
@@ -10,6 +10,7 @@ import {
 import { Camera } from "@mediapipe/camera_utils";
 import { drawConnectors, drawLandmarks } from "@mediapipe/drawing_utils";
 import { SiKakaotalk } from "react-icons/si";
+import { useNavigate, useLocation } from "react-router-dom";
 
 function WordTranslation() {
   const webcamRef = useRef(null);
@@ -28,6 +29,9 @@ function WordTranslation() {
   const startTimeRef = useRef(startTime);
   const recognizeDelay = 2000; // 2초로 설정
 
+  const navigate = useNavigate();
+  const location = useLocation();
+
   useEffect(() => {
     sentenceRef.current = sentence;
   }, [sentence]);
@@ -40,94 +44,9 @@ function WordTranslation() {
     startTimeRef.current = startTime;
   }, [startTime]);
 
-  const onResults = useCallback((results) => {
-    const canvasElement = canvasRef.current;
-    const canvasCtx = canvasElement.getContext("2d");
-
-    // 캔버스 초기화
-    canvasCtx.save();
-    canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-
-    // 좌우 반전 설정
-    canvasCtx.translate(canvasElement.width, 0);
-    canvasCtx.scale(-1, 1);
-
-    // 이미지 그리기
-    canvasCtx.drawImage(
-      results.image,
-      0,
-      0,
-      canvasElement.width,
-      canvasElement.height
-    );
-
-    // 랜드마크 그리기
-    if (results.poseLandmarks) {
-      drawConnectors(canvasCtx, results.poseLandmarks, POSE_CONNECTIONS, {
-        color: "#00FF00",
-        lineWidth: 2,
-      });
-    }
-
-    if (results.leftHandLandmarks) {
-      drawConnectors(canvasCtx, results.leftHandLandmarks, HAND_CONNECTIONS, {
-        color: "#FF0000",
-        lineWidth: 2,
-      });
-      drawLandmarks(canvasCtx, results.leftHandLandmarks, {
-        color: "#FF0000",
-        lineWidth: 1,
-      });
-    }
-
-    if (results.rightHandLandmarks) {
-      drawConnectors(canvasCtx, results.rightHandLandmarks, HAND_CONNECTIONS, {
-        color: "#0000FF",
-        lineWidth: 2,
-      });
-      drawLandmarks(canvasCtx, results.rightHandLandmarks, {
-        color: "#0000FF",
-        lineWidth: 1,
-      });
-    }
-
-    // 캔버스 상태 복원
-    canvasCtx.restore();
-
-    // 랜드마크 데이터를 서버로 전송
-    const landmarksData = {
-      poseLandmarks: results.poseLandmarks
-        ? results.poseLandmarks.map((landmark) => ({
-            x: landmark.x,
-            y: landmark.y,
-            z: landmark.z,
-            visibility: landmark.visibility,
-          }))
-        : null,
-      leftHandLandmarks: results.leftHandLandmarks
-        ? results.leftHandLandmarks.map((landmark) => ({
-            x: landmark.x,
-            y: landmark.y,
-            z: landmark.z,
-          }))
-        : null,
-      rightHandLandmarks: results.rightHandLandmarks
-        ? results.rightHandLandmarks.map((landmark) => ({
-            x: landmark.x,
-            y: landmark.y,
-            z: landmark.z,
-          }))
-        : null,
-    };
-
-    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-      socketRef.current.send(JSON.stringify(landmarksData));
-    } else {
-      console.error("WebSocket connection is not open.");
-    }
-  }, []);
-
   useEffect(() => {
+    let isMounted = true;
+
     // WebSocket 연결
     socketRef.current = new WebSocket("ws://localhost:8082");
 
@@ -203,14 +122,119 @@ function WordTranslation() {
       selfieMode: true, // 좌우 반전 적용
     });
 
+    const onResults = (results) => {
+      if (!isMounted) return;
+
+      const canvasElement = canvasRef.current;
+      const canvasCtx = canvasElement.getContext("2d");
+
+      // 캔버스 초기화
+      canvasCtx.save();
+      canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+
+      // 좌우 반전 설정
+      canvasCtx.translate(canvasElement.width, 0);
+      canvasCtx.scale(-1, 1);
+
+      // 이미지 그리기
+      canvasCtx.drawImage(
+        results.image,
+        0,
+        0,
+        canvasElement.width,
+        canvasElement.height
+      );
+
+      // 랜드마크 그리기
+      if (results.poseLandmarks) {
+        drawConnectors(canvasCtx, results.poseLandmarks, POSE_CONNECTIONS, {
+          color: "#00FF00",
+          lineWidth: 2,
+        });
+      }
+
+      if (results.leftHandLandmarks) {
+        drawConnectors(canvasCtx, results.leftHandLandmarks, HAND_CONNECTIONS, {
+          color: "#FF0000",
+          lineWidth: 2,
+        });
+        drawLandmarks(canvasCtx, results.leftHandLandmarks, {
+          color: "#FF0000",
+          lineWidth: 1,
+        });
+      }
+
+      if (results.rightHandLandmarks) {
+        drawConnectors(
+          canvasCtx,
+          results.rightHandLandmarks,
+          HAND_CONNECTIONS,
+          {
+            color: "#0000FF",
+            lineWidth: 2,
+          }
+        );
+        drawLandmarks(canvasCtx, results.rightHandLandmarks, {
+          color: "#0000FF",
+          lineWidth: 1,
+        });
+      }
+
+      // 캔버스 상태 복원
+      canvasCtx.restore();
+
+      // 랜드마크 데이터를 서버로 전송
+      const landmarksData = {
+        poseLandmarks: results.poseLandmarks
+          ? results.poseLandmarks.map((landmark) => ({
+              x: landmark.x,
+              y: landmark.y,
+              z: landmark.z,
+              visibility: landmark.visibility,
+            }))
+          : null,
+        leftHandLandmarks: results.leftHandLandmarks
+          ? results.leftHandLandmarks.map((landmark) => ({
+              x: landmark.x,
+              y: landmark.y,
+              z: landmark.z,
+            }))
+          : null,
+        rightHandLandmarks: results.rightHandLandmarks
+          ? results.rightHandLandmarks.map((landmark) => ({
+              x: landmark.x,
+              y: landmark.y,
+              z: landmark.z,
+            }))
+          : null,
+      };
+
+      if (
+        socketRef.current &&
+        socketRef.current.readyState === WebSocket.OPEN
+      ) {
+        socketRef.current.send(JSON.stringify(landmarksData));
+      } else {
+        console.error("WebSocket connection is not open.");
+      }
+    };
+
     holisticRef.current.onResults(onResults);
 
     // 웹캠 초기화
     const initializeCamera = () => {
-      if (webcamRef.current && webcamRef.current.video.readyState === 4) {
+      if (
+        webcamRef.current &&
+        webcamRef.current.video.readyState === 4 &&
+        isMounted
+      ) {
         cameraRef.current = new Camera(webcamRef.current.video, {
           onFrame: async () => {
-            await holisticRef.current.send({ image: webcamRef.current.video });
+            if (isMounted && webcamRef.current && webcamRef.current.video) {
+              await holisticRef.current.send({
+                image: webcamRef.current.video,
+              });
+            }
           },
           width: 640,
           height: 480,
@@ -218,13 +242,19 @@ function WordTranslation() {
         cameraRef.current.start();
       } else {
         const interval = setInterval(() => {
-          if (webcamRef.current && webcamRef.current.video.readyState === 4) {
+          if (
+            webcamRef.current &&
+            webcamRef.current.video.readyState === 4 &&
+            isMounted
+          ) {
             clearInterval(interval);
             cameraRef.current = new Camera(webcamRef.current.video, {
               onFrame: async () => {
-                await holisticRef.current.send({
-                  image: webcamRef.current.video,
-                });
+                if (isMounted && webcamRef.current && webcamRef.current.video) {
+                  await holisticRef.current.send({
+                    image: webcamRef.current.video,
+                  });
+                }
               },
               width: 640,
               height: 480,
@@ -238,17 +268,21 @@ function WordTranslation() {
     initializeCamera();
 
     return () => {
+      isMounted = false;
       if (socketRef.current) {
         socketRef.current.close();
+        socketRef.current = null;
       }
       if (holisticRef.current) {
         holisticRef.current.close();
+        holisticRef.current = null;
       }
       if (cameraRef.current) {
         cameraRef.current.stop();
+        cameraRef.current = null;
       }
     };
-  }, [onResults]);
+  }, []);
 
   const shareToKakao = () => {
     console.log("카카오톡 공유 버튼이 클릭되었습니다.");
@@ -308,6 +342,30 @@ function WordTranslation() {
       <div className="status-container">
         <p>현재 인식중인 동작: {translationResult}</p>
         <p>연결 상태: {connectionStatus}</p>
+      </div>
+
+      {/* 모드 전환 버튼 */}
+      <div className="mode-switcher">
+        <button
+          onClick={() => {
+            if (location.pathname !== "/finger-spelling") {
+              navigate("/finger-spelling");
+            }
+          }}
+          className={location.pathname === "/finger-spelling" ? "active" : ""}
+        >
+          지문자 모드
+        </button>
+        <button
+          onClick={() => {
+            if (location.pathname !== "/word-translation") {
+              navigate("/word-translation");
+            }
+          }}
+          className={location.pathname === "/word-translation" ? "active" : ""}
+        >
+          단어 번역 모드
+        </button>
       </div>
     </main>
   );
