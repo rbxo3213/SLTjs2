@@ -44,6 +44,14 @@ function WordTranslation() {
     startTimeRef.current = startTime;
   }, [startTime]);
 
+  // Kakao SDK 초기화
+  useEffect(() => {
+    if (window.Kakao && !window.Kakao.isInitialized()) {
+      window.Kakao.init("1e157e9fb7ac775d68ced205ece37f1f");
+      console.log("Kakao SDK initialized");
+    }
+  }, []);
+
   useEffect(() => {
     let isMounted = true;
 
@@ -285,7 +293,30 @@ function WordTranslation() {
   }, []);
 
   const shareToKakao = () => {
-    console.log("카카오톡 공유 버튼이 클릭되었습니다.");
+    if (window.Kakao) {
+      if (!window.Kakao.isInitialized()) {
+        window.Kakao.init("1e157e9fb7ac775d68ced205ece37f1f");
+      }
+
+      const maxTextLength = 200;
+      let message = `번역 결과: ${sentence}\n\nSLTjs2 웹사이트에서 수어를 번역한 메시지입니다.`;
+
+      if (message.length > maxTextLength) {
+        message = message.substring(0, maxTextLength - 3) + "...";
+      }
+
+      window.Kakao.Link.sendDefault({
+        objectType: "text",
+        text: message,
+        link: {
+          mobileWebUrl: "http://localhost:3000", // 실제 웹사이트 URL로 변경하세요
+          webUrl: "http://localhost:3000", // 실제 웹사이트 URL로 변경하세요
+        },
+        buttonTitle: "웹사이트로 이동",
+      });
+    } else {
+      alert("카카오 SDK를 로드하지 못했습니다.");
+    }
   };
 
   return (
