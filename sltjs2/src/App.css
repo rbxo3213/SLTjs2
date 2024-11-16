@@ -441,6 +441,12 @@
   border: none;
   background-color: #e0e0e0;
   cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+/* Hover 스타일 추가 */
+.mode-switcher button:hover {
+  background-color: #d0d0d0; /* 원하는 색상으로 변경 */
 }
 
 .mode-switcher button.active {
@@ -450,9 +456,4 @@
 
 .mode-switcher button + button {
   border-left: 1px solid #c0c0c0;
-}
-
-/* main-content에 패딩 추가 */
-.main-content {
-  padding-bottom: 60px; /* 모드 전환 버튼 공간 확보 */
 }
