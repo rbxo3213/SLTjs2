@@ -127,7 +127,7 @@ function WordTranslation() {
       smoothLandmarks: true,
       minDetectionConfidence: 0.5,
       minTrackingConfidence: 0.5,
-      selfieMode: true, // 좌우 반전 적용
+      selfieMode: false, // 좌우 반전 해제
     });
 
     const onResults = (results) => {
@@ -140,11 +140,7 @@ function WordTranslation() {
       canvasCtx.save();
       canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
 
-      // 좌우 반전 설정
-      canvasCtx.translate(canvasElement.width, 0);
-      canvasCtx.scale(-1, 1);
-
-      // 이미지 그리기
+      // 이미지 그리기 (좌우 반전 없음)
       canvasCtx.drawImage(
         results.image,
         0,
@@ -330,7 +326,7 @@ function WordTranslation() {
             width={480}
             height={480}
             screenshotFormat="image/jpeg"
-            mirrored={true} // 좌우 반전 적용
+            mirrored={false} // 좌우 반전 해제
             style={{ visibility: "hidden" }}
           />
           <canvas

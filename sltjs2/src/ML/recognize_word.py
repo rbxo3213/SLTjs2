@@ -17,10 +17,10 @@ except IOError:
     exit()
 
 # 액션(단어) 리스트 정의 (한국어 수어 단어)
-actions = np.array(['감사','미안','보다','알다','서울'])
+actions = np.array(['감사','미안','보다','알다','안녕하세요','무동작'])
 
 # 모델 로드
-model_path = 'sltjs2/src/ML/five_words_sign_language_model.h5'
+model_path = 'sltjs2/src/ML/six_words_sign_language_model.h5'
 try:
     model = tf.keras.models.load_model(model_path)
     print(f"모델 로드 성공: {model_path}")
