@@ -10,10 +10,12 @@ function Signup({ onSuccess }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nickname, setNickname] = useState("");
+  const [error, setError] = useState(""); // 에러 상태 추가
   const navigate = useNavigate();
 
   const handleSignup = async (e) => {
     e.preventDefault();
+    setError(""); // 기존 에러 초기화
     try {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
@@ -44,7 +46,7 @@ function Signup({ onSuccess }) {
       navigate("/");
     } catch (error) {
       console.error("회원가입 에러:", error);
-      alert(error.message);
+      setError(error.message); // 에러 메시지 상태 업데이트
     }
   };
 
@@ -73,6 +75,8 @@ function Signup({ onSuccess }) {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
+        {error && <p className="error-message">{error}</p>}{" "}
+        {/* 에러 메시지 표시 */}
         <button type="submit">회원가입</button>
       </form>
     </div>

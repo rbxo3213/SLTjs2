@@ -1,6 +1,6 @@
 // src/pages/QuizType1.js
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react"; // useRef 추가
 import { letters } from "../data/letters";
 import { auth } from "../firebaseConfig";
 import { useNavigate } from "react-router-dom";
@@ -15,6 +15,9 @@ function QuizType1() {
   const [questions, setQuestions] = useState([]);
   const [isCorrect, setIsCorrect] = useState(null); // 정답 여부 상태 추가
   const navigate = useNavigate();
+  const [error, setError] = useState(""); // 에러 상태 추가
+
+  const inputRef = useRef(null); // 입력 필드 참조 생성
 
   useEffect(() => {
     if (!auth.currentUser) {
@@ -54,6 +57,33 @@ function QuizType1() {
     }
   };
 
+  // Enter 키 이벤트 핸들러 추가
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Enter") {
+        if (showAnswer) {
+          // 피드백이 표시 중일 때 Enter 키를 누르면 다음 문제로 이동
+          handleNext();
+        }
+      }
+    };
+
+    // 이벤트 리스너 등록
+    window.addEventListener("keydown", handleKeyDown);
+
+    // 컴포넌트 언마운트 시 이벤트 리스너 제거
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showAnswer, currentQuestion, score, userAnswer]);
+
+  // 새로운 질문이 시작될 때 입력 필드에 포커스 맞추기
+  useEffect(() => {
+    if (!showAnswer && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [currentQuestion, showAnswer]);
+
   if (questions.length === 0) {
     return <div>로딩 중...</div>;
   }
@@ -86,21 +116,27 @@ function QuizType1() {
           <button onClick={handleNext} className="quiz-button">
             다음 문제
           </button>
+          <p className="instruction">Enter 키를 눌러 다음 문제로 넘어갑니다.</p>
         </div>
       ) : (
         <form onSubmit={handleSubmit}>
           <input
+            ref={inputRef} // ref 할당
             type="text"
             value={userAnswer}
             onChange={(e) => setUserAnswer(e.target.value)}
             maxLength={1}
             className="quiz-input"
+            required
+            aria-label="답변 입력"
           />
           <button type="submit" className="quiz-button">
             제출
           </button>
         </form>
       )}
+      {error && <p className="error-message">{error}</p>}{" "}
+      {/* 에러 메시지 표시 */}
     </div>
   );
 }

@@ -20,6 +20,7 @@ const githubProvider = new GithubAuthProvider();
 function Login({ onSuccess }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState(""); // 에러 상태 추가
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -32,6 +33,7 @@ function Login({ onSuccess }) {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError(""); // 기존 에러 초기화
     try {
       const userCredential = await signInWithEmailAndPassword(
         auth,
@@ -56,7 +58,7 @@ function Login({ onSuccess }) {
       onSuccess();
     } catch (error) {
       console.error("로그인 에러:", error);
-      alert(error.message);
+      setError(error.message); // 에러 메시지 상태 업데이트
     }
   };
 
@@ -87,7 +89,7 @@ function Login({ onSuccess }) {
       onSuccess();
     } catch (error) {
       console.error("Google 로그인 에러:", error);
-      alert(error.message);
+      setError(error.message); // 에러 메시지 상태 업데이트
     }
   };
 
@@ -118,7 +120,7 @@ function Login({ onSuccess }) {
       onSuccess();
     } catch (error) {
       console.error("GitHub 로그인 에러:", error);
-      alert(error.message);
+      setError(error.message); // 에러 메시지 상태 업데이트
     }
   };
 
@@ -143,13 +145,17 @@ function Login({ onSuccess }) {
           placeholder="이메일"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          required
         />
         <input
           type="password"
           placeholder="비밀번호"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          required
         />
+        {error && <p className="error-message">{error}</p>}{" "}
+        {/* 에러 메시지 표시 */}
         <button type="submit">로그인</button>
       </form>
       <div className="social-login-buttons">
@@ -159,7 +165,7 @@ function Login({ onSuccess }) {
         <button className="social-button" onClick={handleGithubLogin}>
           <FaGithub className="icon" /> GitHub 로그인
         </button>
-        <button className="social-button" onClick={handleKakaoLogin}>
+        <button className="social-button kakao" onClick={handleKakaoLogin}>
           <SiKakaotalk className="icon" /> 카카오 로그인
         </button>
       </div>

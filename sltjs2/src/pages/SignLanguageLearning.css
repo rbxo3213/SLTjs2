@@ -23,27 +23,78 @@
   color: #2c3e50;
 }
 
-.sign-learning-image-container {
+/* 슬라이더 스타일 */
+.sign-learning-slider {
   display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.learning-material {
+  width: 100%;
+  display: flex;
+  flex-direction: column; /* 수어 이름과 미디어를 세로로 배치 */
   justify-content: center;
   align-items: center;
 }
 
-.sign-learning-image {
+.current-sign-name {
+  margin-bottom: 10px;
+  font-size: 20px;
+  color: #3498db;
+  font-weight: bold;
+}
+
+.sign-learning-media {
   width: 100%;
-  max-width: 600px; /* 이미지 크기 조정 */
+  max-width: 600px;
   height: auto;
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* 반응형 디자인 */
-@media (max-width: 768px) {
-  .sign-learning-container {
-    padding: 10px;
-  }
+/* 네비게이션 버튼 스타일 */
+.nav-button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  font-size: 24px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
 
-  .sign-learning-image {
-    max-width: 100%;
-  }
+.nav-button:hover {
+  background-color: #2980b9;
+}
+
+.prev-button {
+  margin-right: 10px;
+}
+
+.next-button {
+  margin-left: 10px;
+}
+
+/* 슬라이더 인디케이터 스타일 */
+.slider-indicators {
+  display: flex;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.indicator {
+  width: 12px;
+  height: 12px;
+  background-color: #ddd;
+  border-radius: 50%;
+  margin: 0 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.indicator.active {
+  background-color: #3498db;
 }
