@@ -12,22 +12,29 @@ function Ranking() {
   useEffect(() => {
     const fetchScores = async () => {
       try {
-        // 지문자 이미지 퀴즈 점수 가져오기
-        const scoresRef1 = collection(db, "scores");
-        const q1 = query(scoresRef1, where("type", "==", "QuizType1"));
+        // scores 컬렉션 참조
+        const scoresRef = collection(db, "scores");
+
+        // QuizType1 점수 가져오기
+        const q1 = query(scoresRef, where("type", "==", "QuizType1"));
         const querySnapshot1 = await getDocs(q1);
         const scores1 = querySnapshot1.docs.map((doc) => doc.data());
 
-        // 수어 동작 퀴즈 점수 가져오기
-        const scoresRef2 = collection(db, "scores");
-        const q2 = query(scoresRef2, where("type", "==", "QuizType2"));
+        console.log("QuizType1 Scores:", scores1); // 로그 추가
+
+        // QuizType2 점수 가져오기
+        const q2 = query(scoresRef, where("type", "==", "QuizType2"));
         const querySnapshot2 = await getDocs(q2);
         const scores2 = querySnapshot2.docs.map((doc) => doc.data());
 
-        // 사용자 정보 가져오기
+        console.log("QuizType2 Scores:", scores2); // 로그 추가
+
+        // users 컬렉션 참조
         const usersRef = collection(db, "users");
         const usersSnapshot = await getDocs(usersRef);
         const usersData = usersSnapshot.docs.map((doc) => doc.data());
+
+        console.log("Users Data:", usersData); // 로그 추가
 
         // uid를 키로 닉네임을 값으로 하는 맵 생성
         const uidToNickname = {};
@@ -35,16 +42,22 @@ function Ranking() {
           uidToNickname[user.uid] = user.nickname || "익명 사용자";
         });
 
+        console.log("UID to Nickname Map:", uidToNickname); // 로그 추가
+
         // 각 퀴즈 유형별로 계정별 평균 점수와 판수 계산
         const calculateRanks = (scores) => {
           const userScores = {};
 
           scores.forEach((score) => {
             const uid = score.uid || "guest"; // uid 사용
+            const numericScore =
+              typeof score.score === "number"
+                ? score.score
+                : parseFloat(score.score);
             if (!userScores[uid]) {
               userScores[uid] = { totalScore: 0, attempts: 0 };
             }
-            userScores[uid].totalScore += score.score;
+            userScores[uid].totalScore += numericScore;
             userScores[uid].attempts += 1;
           });
 
@@ -69,6 +82,9 @@ function Ranking() {
 
         const quiz1Ranks = calculateRanks(scores1);
         const quiz2Ranks = calculateRanks(scores2);
+
+        console.log("QuizType1 Ranks:", quiz1Ranks); // 로그 추가
+        console.log("QuizType2 Ranks:", quiz2Ranks); // 로그 추가
 
         setQuizType1Ranks(quiz1Ranks);
         setQuizType2Ranks(quiz2Ranks);
@@ -96,14 +112,20 @@ function Ranking() {
               </tr>
             </thead>
             <tbody>
-              {quizType1Ranks.map((rank, index) => (
-                <tr key={index}>
-                  <td>{index + 1}</td>
-                  <td>{rank.nickname}</td>
-                  <td>{rank.averageScore.toFixed(2)}</td>
-                  <td>{rank.attempts}</td>
+              {quizType1Ranks.length > 0 ? (
+                quizType1Ranks.map((rank, index) => (
+                  <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td>{rank.nickname}</td>
+                    <td>{rank.averageScore.toFixed(2)}</td>
+                    <td>{rank.attempts}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4">랭킹 데이터가 없습니다.</td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
@@ -119,14 +141,20 @@ function Ranking() {
               </tr>
             </thead>
             <tbody>
-              {quizType2Ranks.map((rank, index) => (
-                <tr key={index}>
-                  <td>{index + 1}</td>
-                  <td>{rank.nickname}</td>
-                  <td>{rank.averageScore.toFixed(2)}</td>
-                  <td>{rank.attempts}</td>
+              {quizType2Ranks.length > 0 ? (
+                quizType2Ranks.map((rank, index) => (
+                  <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td>{rank.nickname}</td>
+                    <td>{rank.averageScore.toFixed(2)}</td>
+                    <td>{rank.attempts}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4">랭킹 데이터가 없습니다.</td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>

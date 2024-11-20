@@ -8,6 +8,7 @@ import { drawConnectors, drawLandmarks } from "@mediapipe/drawing_utils";
 import HangulComposer from "./HangulComposer";
 import { SiKakaotalk } from "react-icons/si";
 import { useNavigate, useLocation } from "react-router-dom";
+import CardSection from "./components/CardSection"; // CardSection 컴포넌트 임포트
 
 function MainContent() {
   const webcamRef = useRef(null);
@@ -319,6 +320,15 @@ function MainContent() {
         </div>
       </div>
 
+      {/* 현재 인식중인 수어와 연결 상태 */}
+      <div className="status-container">
+        <p>현재 인식중인 수어: {translationResult}</p>
+        <p>연결 상태: {connectionStatus}</p>
+      </div>
+
+      {/* CardSection 컴포넌트 추가 */}
+      <CardSection />
+
       {/* 카카오톡 공유 버튼과 복사 버튼을 화면 하단 우측에 고정 */}
       <div className="fixed-button-group">
         <button className="kakao-share-button" onClick={shareToKakao}>
@@ -333,12 +343,6 @@ function MainContent() {
         >
           복사
         </button>
-      </div>
-
-      {/* 현재 인식중인 수어와 연결 상태 */}
-      <div className="status-container">
-        <p>현재 인식중인 수어: {translationResult}</p>
-        <p>연결 상태: {connectionStatus}</p>
       </div>
 
       {/* 모드 전환 버튼 */}
