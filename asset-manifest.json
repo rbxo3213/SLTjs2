@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/SLTjs2/static/css/main.87cdbd8f.css",
+    "main.js": "/SLTjs2/static/js/main.e5d576e4.js",
+    "index.html": "/SLTjs2/index.html",
+    "main.87cdbd8f.css.map": "/SLTjs2/static/css/main.87cdbd8f.css.map",
+    "main.e5d576e4.js.map": "/SLTjs2/static/js/main.e5d576e4.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.87cdbd8f.css",
+    "static/js/main.e5d576e4.js"
+  ]
+}
