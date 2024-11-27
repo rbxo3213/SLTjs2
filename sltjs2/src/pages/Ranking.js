@@ -130,7 +130,7 @@ function Ranking() {
           </table>
         </div>
         <div className="ranking-table-container">
-          <h3>수어 동작 퀴즈</h3>
+          <h3>지문자 동작 퀴즈</h3>
           <table className="ranking-table">
             <thead>
               <tr>

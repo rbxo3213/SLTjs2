@@ -1,5 +1,5 @@
 # landmark_recognizer_forweb.py
-
+# 웹에서 지문자 인식 위한 코드
 import os
 import sys
 import json

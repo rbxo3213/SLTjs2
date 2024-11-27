@@ -33,6 +33,11 @@ function WordTranslation() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // 유니크한 ID 생성을 위한 함수
+  function generateUniqueId() {
+    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  }
+
   useEffect(() => {
     sentenceRef.current = sentence;
   }, [sentence]);
@@ -190,6 +195,7 @@ function WordTranslation() {
 
       // 랜드마크 데이터를 서버로 전송
       const landmarksData = {
+        id: generateUniqueId(), // 고유한 ID 추가
         poseLandmarks: results.poseLandmarks
           ? results.poseLandmarks.map((landmark) => ({
               x: landmark.x,

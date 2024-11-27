@@ -9,6 +9,7 @@ import Webcam from "react-webcam";
 import { Hands, HAND_CONNECTIONS } from "@mediapipe/hands";
 import { Camera } from "@mediapipe/camera_utils";
 import { drawConnectors, drawLandmarks } from "@mediapipe/drawing_utils";
+import { motion, AnimatePresence } from "framer-motion"; // 애니메이션을 위한 framer-motion 추가
 import "./Quiz.css";
 
 function QuizType2() {
@@ -17,7 +18,7 @@ function QuizType2() {
   const [showAnswer, setShowAnswer] = useState(false);
   const [questions, setQuestions] = useState([]);
   const [userAnswer, setUserAnswer] = useState("");
-  const [submittedAnswer, setSubmittedAnswer] = useState(""); // 추가된 부분
+  const [submittedAnswer, setSubmittedAnswer] = useState("");
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
   const cameraRef = useRef(null);
@@ -27,11 +28,20 @@ function QuizType2() {
   const [isCorrect, setIsCorrect] = useState(null);
 
   const [translationResult, setTranslationResult] = useState("");
-  const [prevGesture, setPrevGesture] = useState("");
-  const [startTime, setStartTime] = useState(Date.now());
-  const recognizeDelay = 1000;
+  const [gestureStartTime, setGestureStartTime] = useState(null);
+  const [autoSubmitTriggered, setAutoSubmitTriggered] = useState(false);
+  const [countdown, setCountdown] = useState(10); // 타이머 초기화 (10초)
+
+  const GESTURE_THRESHOLD = 2000; // 2초
+  const TOTAL_TIME = 10000; // 10초
+
+  // 마운트 상태를 추적하기 위한 ref
+  const isMounted = useRef(true);
 
   useEffect(() => {
+    // 컴포넌트가 마운트될 때
+    isMounted.current = true;
+
     if (!auth.currentUser) {
       alert("로그인이 필요합니다.");
       navigate("/login");
@@ -42,6 +52,11 @@ function QuizType2() {
       const shuffledLetters = filteredLetters.sort(() => 0.5 - Math.random());
       setQuestions(shuffledLetters.slice(0, 10));
     }
+
+    return () => {
+      // 컴포넌트가 언마운트될 때
+      isMounted.current = false;
+    };
   }, [navigate]);
 
   useEffect(() => {
@@ -55,11 +70,12 @@ function QuizType2() {
     socketRef.current.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        if (data.result) {
-          const currentGesture = data.result.trim(); // 공백 제거
+        if (data.result && isMounted.current) {
+          // 마운트 상태 확인
+          const currentGesture = data.result.trim().toLowerCase();
 
           setTranslationResult(currentGesture);
-          setUserAnswer(currentGesture); // 항상 userAnswer를 업데이트
+          setUserAnswer(currentGesture);
           console.log("userAnswer set to:", currentGesture);
         }
       } catch (err) {
@@ -87,7 +103,7 @@ function QuizType2() {
       modelComplexity: 1,
       minDetectionConfidence: 0.5,
       minTrackingConfidence: 0.5,
-      selfieMode: true,
+      selfieMode: false, // selfieMode를 false로 설정
     });
 
     handsRef.current.onResults(onResults);
@@ -101,9 +117,15 @@ function QuizType2() {
       ) {
         cameraRef.current = new Camera(webcamRef.current.video, {
           onFrame: async () => {
-            await handsRef.current.send({ image: webcamRef.current.video });
+            if (
+              isMounted.current &&
+              webcamRef.current &&
+              webcamRef.current.video
+            ) {
+              await handsRef.current.send({ image: webcamRef.current.video });
+            }
           },
-          width: 640,
+          width: 640, // 해상도 감소
           height: 480,
         });
         cameraRef.current.start();
@@ -117,9 +139,17 @@ function QuizType2() {
             clearInterval(interval);
             cameraRef.current = new Camera(webcamRef.current.video, {
               onFrame: async () => {
-                await handsRef.current.send({ image: webcamRef.current.video });
+                if (
+                  isMounted.current &&
+                  webcamRef.current &&
+                  webcamRef.current.video
+                ) {
+                  await handsRef.current.send({
+                    image: webcamRef.current.video,
+                  });
+                }
               },
-              width: 640,
+              width: 640, // 해상도 감소
               height: 480,
             });
             cameraRef.current.start();
@@ -131,6 +161,7 @@ function QuizType2() {
     initializeCamera();
 
     return () => {
+      // 클린업
       if (socketRef.current) {
         socketRef.current.close();
       }
@@ -139,13 +170,26 @@ function QuizType2() {
       }
       if (cameraRef.current) {
         cameraRef.current.stop();
+        cameraRef.current = null; // 참조 제거
       }
     };
   }, []);
 
   const onResults = (results) => {
+    if (!isMounted.current) return; // 마운트 상태 확인
+
     const canvasElement = canvasRef.current;
+    if (!canvasElement) return; // 캔버스 존재 여부 확인
+
+    const videoElement = webcamRef.current.video;
+    if (!videoElement) return; // 비디오 존재 여부 확인
+
+    // 비디오 크기에 맞춰 캔버스 크기 설정
+    canvasElement.width = videoElement.videoWidth;
+    canvasElement.height = videoElement.videoHeight;
+
     const canvasCtx = canvasElement.getContext("2d");
+    if (!canvasCtx) return; // 캔버스 컨텍스트 존재 여부 확인
 
     // 캔버스 초기화
     canvasCtx.save();
@@ -187,18 +231,21 @@ function QuizType2() {
 
       if (
         socketRef.current &&
-        socketRef.current.readyState === WebSocket.OPEN
+        socketRef.current.readyState === WebSocket.OPEN &&
+        isMounted.current // 마운트 상태 확인
       ) {
         socketRef.current.send(landmarksString);
       } else {
-        console.error("WebSocket connection is not open.");
+        console.error(
+          "WebSocket connection is not open or component unmounted."
+        );
       }
     }
   };
 
   const checkAnswer = () => {
-    const trimmedUserAnswer = userAnswer.trim();
-    const correctAnswer = questions[currentQuestion].trim();
+    const trimmedUserAnswer = userAnswer.trim().toLowerCase();
+    const correctAnswer = questions[currentQuestion].trim().toLowerCase();
     console.log(
       "Comparing userAnswer:",
       trimmedUserAnswer,
@@ -206,85 +253,187 @@ function QuizType2() {
       correctAnswer
     );
 
-    setSubmittedAnswer(trimmedUserAnswer); // 제출한 답변 저장
+    setSubmittedAnswer(trimmedUserAnswer);
 
     if (trimmedUserAnswer === correctAnswer) {
       setScore(score + 1);
-      setIsCorrect(true); // 정답
+      setIsCorrect(true);
     } else {
-      setIsCorrect(false); // 오답
+      setIsCorrect(false);
     }
     setShowAnswer(true);
+    setAutoSubmitTriggered(false); // 수동 제출 시 자동 제출 트리거 해제
   };
 
   const handleNext = () => {
     setUserAnswer("");
     setTranslationResult("");
-    setSubmittedAnswer(""); // 초기화
+    setSubmittedAnswer("");
     setShowAnswer(false);
-    setIsCorrect(null); // 정답 여부 초기화
-    setPrevGesture("");
+    setIsCorrect(null);
+    setGestureStartTime(null);
+    setAutoSubmitTriggered(false);
+    setCountdown(10); // 타이머 초기화
+
     if (currentQuestion + 1 < 10) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
-      // 퀴즈 종료 시 점수 저장
       saveScore(score, "QuizType2");
       navigate("/quiz-result", { state: { score, type: "QuizType2" } });
     }
   };
 
+  // 타이머 및 자동 제출 로직
+  useEffect(() => {
+    if (questions.length === 0 || showAnswer) return;
+
+    const timerInterval = setInterval(() => {
+      setCountdown((prevCountdown) => {
+        if (prevCountdown > 0) return prevCountdown - 1;
+        else return 0;
+      });
+    }, 1000); // 1초마다 카운트다운
+
+    const gestureInterval = setInterval(() => {
+      if (userAnswer) {
+        if (gestureStartTime) {
+          const elapsed = Date.now() - gestureStartTime;
+          if (elapsed >= GESTURE_THRESHOLD && !autoSubmitTriggered) {
+            // 2초 이상 동일한 제스처가 인식되었을 때 자동 제출
+            setAutoSubmitTriggered(true);
+            checkAnswer();
+          }
+        } else {
+          setGestureStartTime(Date.now());
+        }
+      } else {
+        setGestureStartTime(null);
+      }
+    }, 100); // 100ms마다 제스처 인식 시간 확인
+
+    if (countdown === 0 && !showAnswer && !autoSubmitTriggered) {
+      // 시간 초과 시 자동 제출 (오답 처리)
+      checkAnswer();
+    }
+
+    return () => {
+      clearInterval(timerInterval);
+      clearInterval(gestureInterval);
+    };
+  }, [
+    userAnswer,
+    gestureStartTime,
+    showAnswer,
+    autoSubmitTriggered,
+    countdown,
+    questions.length,
+  ]);
+
+  // 자동 제출 시 타이머를 멈추기
+  useEffect(() => {
+    if (autoSubmitTriggered) {
+      setCountdown((prev) => prev); // 현재 카운트다운 유지
+    }
+  }, [autoSubmitTriggered]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Enter") {
+        if (showAnswer) {
+          handleNext();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showAnswer, currentQuestion, score, userAnswer]);
+
   if (questions.length === 0) {
-    return <div>로딩 중...</div>;
+    return <div className="quiz-container">로딩 중...</div>;
   }
 
   return (
     <div className="quiz-container">
-      <h2>수어 동작 퀴즈</h2>
-      <p>문제 {currentQuestion + 1} / 10</p>
-      <p>
+      <h2 className="quiz-header">지문자 동작 퀴즈</h2>
+      <div className="progress-bar">
+        <div
+          className="progress"
+          style={{ width: `${((currentQuestion + 1) / 10) * 100}%` }}
+        ></div>
+      </div>
+      <div className="timer-container">
+        <p className="timer-text">남은 시간: {countdown}초</p>
+        <div className="timer-bar">
+          <div
+            className="timer-progress"
+            style={{ width: `${(countdown / 10) * 100}%` }}
+          ></div>
+        </div>
+      </div>
+      <p className="quiz-subheader">문제 {currentQuestion + 1} / 10</p>
+      <p className="quiz-subheader">
         다음 글자에 해당하는 수어 동작을 취해주세요:{" "}
         <span className="quiz-question">{questions[currentQuestion]}</span>
       </p>
       <div className="webcam-container">
         <Webcam
           ref={webcamRef}
-          style={{ visibility: "hidden" }}
-          width={640}
-          height={480}
+          style={{
+            width: "100%",
+            height: "auto",
+            transform: "scaleX(-1)", // 비디오 미러링
+          }}
+          videoConstraints={{
+            facingMode: "user",
+          }}
         />
-        <canvas
-          ref={canvasRef}
-          className="output_canvas"
-          width={640}
-          height={480}
-        ></canvas>
+        <canvas ref={canvasRef} className="output_canvas"></canvas>
       </div>
-      <p>인식된 수어: {translationResult}</p>
-      {showAnswer ? (
-        <div>
-          {isCorrect ? (
-            <div className="answer-feedback correct">
-              <div className="icon">⭕</div>
-              <p>정답입니다!</p>
-            </div>
-          ) : (
-            <div className="answer-feedback incorrect">
-              <div className="icon">❌</div>
-              <p>오답입니다!</p>
-            </div>
-          )}
-          <p>
-            당신의 답변: {submittedAnswer} / 정답: {questions[currentQuestion]}
-          </p>
-          <button onClick={handleNext} className="quiz-button">
-            다음 문제
-          </button>
-        </div>
-      ) : (
-        <button onClick={checkAnswer} className="quiz-button">
-          답안 제출
-        </button>
-      )}
+      <AnimatePresence>
+        {showAnswer ? (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.5 }}
+          >
+            {isCorrect ? (
+              <div className="answer-feedback correct">
+                <div className="icon">⭕</div>
+                <p>정답입니다!</p>
+              </div>
+            ) : (
+              <div className="answer-feedback incorrect">
+                <div className="icon">❌</div>
+                <p>오답입니다!</p>
+              </div>
+            )}
+            <p className="answer-details">
+              당신의 답변: <strong>{submittedAnswer}</strong> / 정답:{" "}
+              <strong>{questions[currentQuestion]}</strong>
+            </p>
+            <button onClick={handleNext} className="quiz-button">
+              다음 문제
+            </button>
+            <p className="instruction">
+              Enter 키를 눌러 다음 문제로 넘어갑니다.
+            </p>
+          </motion.div>
+        ) : (
+          <motion.button
+            onClick={checkAnswer}
+            className="quiz-button"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            답안 제출
+          </motion.button>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

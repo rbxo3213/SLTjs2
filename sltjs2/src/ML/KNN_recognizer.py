@@ -1,5 +1,5 @@
 # KNN_recognizer.py
-
+# 수어 지문자 인식 로컬에서 테스트
 import cv2
 import mediapipe as mp
 import numpy as np

@@ -1,3 +1,4 @@
+# 수어 지문자 데이터 수집
 import cv2
 import mediapipe as mp
 import numpy as np

@@ -1,3 +1,4 @@
+# 수어 단어 데이터 수집
 import cv2
 import numpy as np
 import os
@@ -6,8 +7,7 @@ import mediapipe as mp
 from PIL import ImageFont, ImageDraw, Image  # PIL 라이브러리 임포트
 
 # 액션(단어) 리스트
-# actions = np.array(['괜찮다', '미안', '사랑', '좋다', '가다', '못하다', '예쁘다', '알다', '보다', '서울', '감사', '나', '너'])
-actions = np.array(['괜찮다','식사'])
+actions = np.array(['감사합니다', '죄송합니다', '보다', '알다', '안녕하세요', '무동작'])
 # 데이터 저장 경로
 DATA_PATH = os.path.join('MP_Data')
 

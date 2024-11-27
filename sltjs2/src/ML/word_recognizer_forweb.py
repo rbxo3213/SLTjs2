@@ -1,4 +1,4 @@
-# word_recognizer_forweb.py
+# 웹에서 수어 단어 인식 위한 코드
 import os
 import sys
 import json
@@ -46,7 +46,7 @@ def extract_keypoints(landmarks):
     return np.concatenate([pose, lh, rh])
 
 def main():
-    buffer = ""
+    sequence = []
     while True:
         try:
             chunk = sys.stdin.readline()
@@ -56,10 +56,13 @@ def main():
             if chunk:
                 # JSON 문자열을 받았을 때 처리
                 try:
-                    landmarks = json.loads(chunk)
+                    data = json.loads(chunk)
+                    request_id = data.get('id')
+                    landmarks = data
+
                     keypoints = extract_keypoints(landmarks)
                     sequence.append(keypoints)
-                    sequence[:] = sequence[-sequence_length:]
+                    sequence = sequence[-sequence_length:]
 
                     if len(sequence) == sequence_length:
                         res = model.predict(np.expand_dims(sequence, axis=0), verbose=0)[0]
@@ -69,26 +72,22 @@ def main():
                         if confidence > threshold and actions[predicted_index] != '무동작':
                             action = actions[predicted_index]
                             # 결과 출력 (JSON)
-                            result_json = json.dumps({'result': action}, ensure_ascii=False)
-                            print(result_json)
-                            sys.stdout.flush()
+                            result_json = json.dumps({'id': request_id, 'result': action}, ensure_ascii=False)
+                            print(result_json, flush=True)
                         else:
-                            print(json.dumps({'result': ''}), flush=True)
+                            print(json.dumps({'id': request_id, 'result': ''}), flush=True)
                     else:
-                        print(json.dumps({'result': ''}), flush=True)
+                        print(json.dumps({'id': request_id, 'result': ''}), flush=True)
 
                 except json.JSONDecodeError as e:
                     error_msg = json.dumps({'error': f"JSON decode error: {e}"}, ensure_ascii=False)
-                    print(error_msg)
-                    sys.stdout.flush()
+                    print(error_msg, flush=True)
                 except Exception as e:
                     error_msg = json.dumps({'error': str(e)}, ensure_ascii=False)
-                    print(error_msg)
-                    sys.stdout.flush()
+                    print(error_msg, flush=True)
         except Exception as e:
             error_msg = json.dumps({'error': str(e)}, ensure_ascii=False)
-            print(error_msg)
-            sys.stdout.flush()
+            print(error_msg, flush=True)
 
 if __name__ == "__main__":
     main()
