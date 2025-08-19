@@ -100,16 +100,6 @@ sltjs2/
 
 ---
 
-## 기여
-
-프로젝트에 기여하려면, 새로운 브랜치를 생성하고 Pull Request를 요청해주세요:
-
-```bash
-git checkout -b feature/새로운기능
-```
-
----
-
 ## 라이선스
 
 이 프로젝트는 MIT 라이선스를 따릅니다. 자세한 내용은 [LICENSE](LICENSE)를 참고하세요.
